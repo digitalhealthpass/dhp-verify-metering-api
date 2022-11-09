@@ -1,0 +1,27 @@
+
+{
+    "log": {
+        "name": "console",
+        "level": "info"
+    },
+    "hpassAPI": {
+        "hostname": "https://dev2.wh-hpass.dev.acme.com/api/v1/hpass"
+    },
+    "upgradeDBOnStartup": true,
+    "postgres": {
+        "connectTimeout": 60000,
+        "requestTimeout": 120000,
+        "connectionPool": { 
+            "max": 2,
+            "min": 0,
+            "acquire": 90000,
+            "idle": 15000
+        }
+    },
+    "appID": {
+        "retries": 1,
+        "retryDelay": 3000,
+        "timeout": 10000
+    },
+    "timeout": 20000
+}

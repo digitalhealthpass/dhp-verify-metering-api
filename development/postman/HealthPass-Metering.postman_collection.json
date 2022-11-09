@@ -1,0 +1,397 @@
+{
+	"info": {
+		"_postman_id": "70b8e5b4-5c9c-4eb7-be53-e659cb4c919b",
+		"name": "HealthPass-Metering",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "AddMetrics",
+			"item": [
+				{
+					"name": "login standard user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.globals.unset(\"HP_API_AUTH_TOKEN\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"token\");",
+									"});",
+									"",
+									"let tokenStr = pm.response.json();",
+									"//console.log(tokenStr);",
+									"",
+									"pm.globals.set(\"HP_API_AUTH_TOKEN\", \"Bearer \" + tokenStr.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tester@poc.com\",\n    \"password\": \"testing123\"\n}"
+						},
+						"url": {
+							"raw": "{{METERING_API}}/users/login",
+							"host": [
+								"{{METERING_API}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const NEW_DATE = new Date()",
+									"pm.variables.set('NEW_DATE', NEW_DATE)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-hpass-txn-id",
+								"value": "101j-asd1-asd1-ad12",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": [{\n        \"customerId\": \"56524238-83dd-46f9-9394-72cc31a7a094\",\n        \"orgId\": \"e0c415de-fece-458f-aa21-252ebd8f39e7\",\n        \"verDID\": \"did:hpass:5c3caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\",        \n        \"scans\": [           \n            {\n                \"datetime\": \"2021-04-17T13:00:00Z\",                \n                \"issuerName\": \"ABC Inc\",\n                \"issuerDID\": \"did:hpass:789caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\",\n                \"scanResult\": \"pass\",\n                \"credentialType\":\"vaccination\",\n                \"total\": 10\n            },\n            {                \n                \"datetime\": \"2021-04-17T13:00:00Z\",\n                \"issuerName\": \"DEF Inc\",\n                \"issuerDID\": \"did:hpass:123caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd07\",\n                \"scanResult\": \"fail\",\n                \"credentialType\":\"vaccination\",\n                \"total\": 5\n            },\n            {                \n                \"datetime\": \"2021-04-17T14:00:00Z\",\n                \"issuerName\": \"ABC Inc\",\n                \"issuerDID\": \"did:hpass:789caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\",\n                \"scanResult\": \"pass\",\n                \"credentialType\":\"covidtest\",\n                \"total\": 80\n            }\n        ]\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{METERING_API}}/metrics/verifier/batch",
+							"host": [
+								"{{METERING_API}}"
+							],
+							"path": [
+								"metrics",
+								"verifier",
+								"batch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add metrics sample",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let res = pm.response.json();",
+									"//console.log(tokenStr);",
+									"",
+									"let now = new Date(Date.now());",
+									"pm.globals.set(\"DATE_NOW\", now.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{HP_API_AUTH_TOKEN}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": [{\n        \"customerId\": \"56524238-83dd-46f9-9394-72cc31a7a094\",\n        \"orgId\": \"e0c415de-fece-458f-aa21-252ebd8f39e7\",\n        \"verDID\": \"did:hpass:5c3caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\",        \n        \"scans\": [           \n            {\n                \"datetime\": \"2021-04-04T13:00:00Z\",                \n                \"issuerName\": \"ABC Inc\",\n                \"issuerDID\": \"did:hpass:789caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\",\n                \"scanResult\": \"pass\",\n                \"credentialType\":\"vaccination\",\n                \"total\": 10\n            },\n            {                \n                \"datetime\": \"2021-04-04T13:00:00Z\",\n                \"issuerName\": \"DEF Inc\",\n                \"issuerDID\": \"did:hpass:123caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd07\",\n                \"scanResult\": \"pass\",\n                \"credentialType\":\"vaccination\",\n                \"total\": 5\n            },\n            {                \n                \"datetime\": \"2021-04-04T14:00:00Z\",\n                \"issuerName\": \"ABC Inc\",\n                \"issuerDID\": \"did:hpass:789caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\",\n                \"scanResult\": \"pass\",\n                \"credentialType\":\"vaccination\",\n                \"total\": 80\n            }\n        ]\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{METERING_API}}/metrics/verifier/batch",
+							"host": [
+								"{{METERING_API}}"
+							],
+							"path": [
+								"metrics",
+								"verifier",
+								"batch"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "QueryMetrics",
+			"item": [
+				{
+					"name": "Query with groupBy",
+					"item": [
+						{
+							"name": "credType",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const threeH = 60 * 1000 * 60 * 3",
+											"const NEW_DATE = new Date(Date.now() + threeH).toISOString()",
+											"pm.variables.set('NEW_DATE', NEW_DATE)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{HP_API_AUTH_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "    {\n        \"selectors\": {\n            \"startDate\": \"2021-04-16T13:00:00Z\", \n            \"endDate\": \"{{DATE_NOW}}\",\n            \"customerId\": \"56524238-83dd-46f9-9394-72cc31a7a094\", \n            \"orgId\": \"e0c415de-fece-458f-aa21-252ebd8f39e7\"\n            \n        },\n        \"groupBy\": {\n            \"credentialType\": true\n        }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{METERING_API}}/metrics/verifier/query",
+									"host": [
+										"{{METERING_API}}"
+									],
+									"path": [
+										"metrics",
+										"verifier",
+										"query"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "credType+scanResult+issuerName",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{HP_API_AUTH_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "    {\n        \"selectors\": {\n            \"startDate\": \"2021-04-16T13:00:00Z\", \n            \"endDate\": \"{{DATE_NOW}}\",\n            \"customerId\": \"56524238-83dd-46f9-9394-72cc31a7a094\", \n            \"orgId\": \"e0c415de-fece-458f-aa21-252ebd8f39e7\",\n            \"verifierDID\": \"did:hpass:5c3caed09426bda7eb7ea51973b7d1eb87c3ec5b472163935ee05e757ecf10fe:f2fff85d420e498de8faa5ca567472c42e522a13f1c18e875a54ef0abdb76c9f#vc-1626b742-e90e-4a44-aa28-68218a7cfd06\"\n        },\n        \"groupBy\": {\n            \"credentialType\": true,\n            \"issuerName\" : true,\n            \"scanResult\": true            \n        }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{METERING_API}}/metrics/verifier/query",
+									"host": [
+										"{{METERING_API}}"
+									],
+									"path": [
+										"metrics",
+										"verifier",
+										"query"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "login query reporter user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.globals.unset(\"HP_API_AUTH_TOKEN\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"token\");",
+									"});",
+									"",
+									"let tokenStr = pm.response.json();",
+									"//console.log(tokenStr);",
+									"",
+									"pm.globals.set(\"HP_API_AUTH_TOKEN\", \"Bearer \" + tokenStr.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"metering@poc.com\",\n    \"password\": \"testing123\"\n}"
+						},
+						"url": {
+							"raw": "{{METERING_API}}/users/login",
+							"host": [
+								"{{METERING_API}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "simple Query",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const threeH = 60 * 1000 * 60 * 3",
+									"const NEW_DATE = new Date(Date.now() + threeH).toISOString()",
+									"pm.variables.set('NEW_DATE', NEW_DATE)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let tokenStr = pm.response.json();",
+									"//console.log(tokenStr);",
+									"let now = new Date(Date.now());",
+									"pm.globals.set(\"DATE_NOW\", now.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{HP_API_AUTH_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"selectors\": {\n            \"startDate\": \"2021-03-19T12:00:00Z\", \n            \"endDate\": \"{{DATE_NOW}}\",\n            \"customerId\": \"56524238-83dd-46f9-9394-72cc31a7a094\", \n            \"orgId\": \"e0c415de-fece-458f-aa21-252ebd8f39e7\"\n            \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{METERING_API}}/metrics/verifier/query",
+							"host": [
+								"{{METERING_API}}"
+							],
+							"path": [
+								"metrics",
+								"verifier",
+								"query"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{METERING_API}}/health",
+					"host": [
+						"{{METERING_API}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
